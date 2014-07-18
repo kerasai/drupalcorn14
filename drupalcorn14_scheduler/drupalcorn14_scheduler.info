@@ -1,0 +1,6 @@
+name = DrupalCorn 14 Scheduler Display
+description = "Adds an extra field to nodes which display scheduling information."
+package = "DrupalCorn"
+core = 7.x
+
+dependencies[] = scheduler

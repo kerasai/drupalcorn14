@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * @file
+ * DrupalCorn 14 Scheduler Display module code.
+ */
+
+/**
+ * Implements hook_field_extra_fields().
+ */
+function drupalcorn14_scheduler_field_extra_fields() {
+  $extra = array();
+
+  // Iterate through the node types and add the extra field on the display for
+  // enabled types.
+  foreach (node_type_get_types() as $type) {
+    $publishing_enabled = variable_get('scheduler_publish_enable_' . $type->type, 0);
+    $unpublishing_enabled = variable_get('scheduler_unpublish_enable_' . $type->type, 0);
+
+    if ($publishing_enabled || $unpublishing_enabled) {
+      $extra['node'][$type->type]['display']['drupalcorn14_scheduler'] = array(
+        'label' => t('Scheduler'),
+        'description' => t('Scheduling settings'),
+        'weight' => 0,
+      );
+    }
+  }
+
+  return $extra;
+}
+
+/**
+ * Implements hook_node_view().
+ */
+function drupalcorn14_scheduler_node_view($node) {
+
+  $publishing_enabled = variable_get('scheduler_publish_enable_' . $node->type, 0);
+  $unpublishing_enabled = variable_get('scheduler_unpublish_enable_' . $node->type, 0);
+
+  if ($publishing_enabled || $unpublishing_enabled) {
+    $node->content['drupalcorn14_scheduler']['#theme'] = 'item_list';
+  }
+
+  if ($publishing_enabled) {
+    $args = array('!date' => $node->scheduler['published']);
+    $node->content['drupalcorn14_scheduler']['#items']['publish'] = t('Scheduled for publish at !date.', $args);
+  }
+
+  if ($unpublishing_enabled) {
+    $args = array('!date' => $node->scheduler['unpublished']);
+    $node->content['drupalcorn14_scheduler']['#items']['unpublish'] = t('Scheduled for unpublish at !date.', $args);
+  }
+
+}
