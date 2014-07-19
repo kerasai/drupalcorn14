@@ -21,8 +21,6 @@ function drupalcorn14_dateonly_field_widget_info() {
  */
 function drupalcorn14_dateonly_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
-    dsm($element, __FUNCTION__);
-
   switch ($instance['widget']['type']) {
     case 'drupalcorn14_dateonly':
       $element['#type'] = 'textfield';
