@@ -1,0 +1,6 @@
+name = DrupalCorn 14 Date Only
+description = "Provides a field widget capable of collecting a date."
+package = "DrupalCorn"
+core = 7.x
+
+dependencies[] = date

@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * Implements hook_field_widget_info().
+ */
+function drupalcorn14_dateonly_field_widget_info() {
+  $info['drupalcorn14_dateonly'] = array(
+    'label' => t('Date only'),
+    'field types' => array('datetime'),
+    'settings' => array('size' => 14),
+    'behaviors' => array(
+      'multiple values' => FIELD_BEHAVIOR_DEFAULT,
+      'default value' => FIELD_BEHAVIOR_DEFAULT,
+    ),
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function drupalcorn14_dateonly_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+
+    dsm($element, __FUNCTION__);
+
+  switch ($instance['widget']['type']) {
+    case 'drupalcorn14_dateonly':
+      $element['#type'] = 'textfield';
+      $element['#default_value'] = isset($items[$delta]['value']) ? date('d/m/Y', strtotime($items[$delta]['value'])) : NULL;
+      $element['#size'] = $instance['widget']['settings']['size'];
+      $element['#maxlength'] = 10;
+      $element['#id'] =  drupal_html_id($instance['widget']['type']);
+
+      $element['#element_validate'][] = '_drupalcorn14_dateonly_field_widget_validate';
+      $element['#attached']['library'][] = array('system', 'ui.datepicker');
+      $element['#attached']['js'][] = drupal_get_path('module', 'drupalcorn14_dateonly') . '/datePopup.js';
+      $data = array('drupalcorn14Dateonly' => array($delta => '#' . $element['#id']));
+      $element['#attached']['js'][] = array('data' => $data, 'type' => 'setting');
+      break;
+  }
+
+  $timezone = array(
+    '#type' => 'value',
+    '#value' => date_default_timezone_get(),
+  );
+
+  return array(
+    'value' => $element,
+    'timezone' => $timezone,
+  );
+}
+
+/**
+ * Implements hook_field_widget_settings_form().
+ */
+function drupalcorn14_dateonly_field_widget_settings_form($field, $instance) {
+  $form = array();
+  $widget = $instance['widget'];
+  $settings = $widget['settings'];
+
+  if ($widget['type'] == 'drupalcorn14_dateonly') {
+    $form['size'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Size of textfield'),
+      '#default_value' => $settings['size'],
+      '#element_validate' => array('element_validate_integer_positive'),
+      '#required' => TRUE,
+    );
+  }
+
+  return $form;
+}
+
+/**
+ * Validation for drupalcorn14_dateonly widget.
+ */
+function _drupalcorn14_dateonly_field_widget_validate($element, &$form_state) {
+  $value = (!empty($element['#value'])) ? $element['#value'] : NULL;
+
+  // If empty, nothing to validate.
+  if ($value === NULL) {
+    return;
+  }
+
+  // Ensure input is parse-able.
+  if (!strtotime($value)) {
+    form_error($element, t('%name must be a valid date.', array('%name' => $element['#title'])));
+  } else {
+    // Normalize the input, and set back onto the form.
+    $value = date('Y-m-d', strtotime($value));
+    form_set_value($element, $value, $form_state);
+  }
+
+}
