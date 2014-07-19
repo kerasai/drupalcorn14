@@ -41,12 +41,12 @@ function drupalcorn14_scheduler_node_view($node) {
     $node->content['drupalcorn14_scheduler']['#theme'] = 'item_list';
   }
 
-  if ($publishing_enabled) {
+  if ($publishing_enabled && !empty($node->scheduler['published'])) {
     $args = array('!date' => $node->scheduler['published']);
     $node->content['drupalcorn14_scheduler']['#items']['publish'] = t('Scheduled for publish at !date.', $args);
   }
 
-  if ($unpublishing_enabled) {
+  if ($unpublishing_enabled && !empty($node->scheduler['unpublished'])) {
     $args = array('!date' => $node->scheduler['unpublished']);
     $node->content['drupalcorn14_scheduler']['#items']['unpublish'] = t('Scheduled for unpublish at !date.', $args);
   }
