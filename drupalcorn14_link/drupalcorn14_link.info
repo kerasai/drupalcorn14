@@ -1,0 +1,6 @@
+name = DrupalCorn 14 Link
+description = "Additional options to display link fields as an iframe or redirect."
+package = "DrupalCorn"
+core = 7.x
+
+dependencies[] = link

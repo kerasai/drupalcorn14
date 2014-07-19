@@ -1,0 +1,117 @@
+<?php
+
+/**
+ * @file
+ * DrupalCorn 14 iframe module code.
+ */
+
+/**
+ * Implements hook_field_formatter_info().
+ */
+function drupalcorn14_link_field_formatter_info() {
+  $info['drupalcorn14_link_redirect'] = array(
+    'label' => t('Redirect'),
+    'field types' => array('link_field'),
+  );
+
+  $info['drupalcorn14_link_iframe'] = array(
+    'label' => t('iframe'),
+    'field types' => array('link_field'),
+    'settings' => array(
+      'height' => 640,
+      'width' => 480,
+    ),
+  );
+
+  return $info;
+}
+
+
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function drupalcorn14_link_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+
+    case 'drupalcorn14_link_redirect':
+      foreach ($items as $delta => $item) {
+        $args = array(
+          '!placeholder' => '<span class="drupalcorn14-link-countdown" data-redirect-target="' . check_plain($item['url']). '"></span>',
+        );
+        $element[$delta] = array(
+          '#markup' => t('Redirecting in !placeholder', $args),
+        );
+      }
+      $element['#attached']['js'][] = drupal_get_path('module', 'drupalcorn14_link') . '/drupalcorn14_link.js';
+      break;
+
+    case 'drupalcorn14_link_iframe':
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+          '#markup' => "<iframe height=\"{$settings['height']}\" width=\"{$settings['width']}\" src=\"{$item['url']}\"></iframe>",
+        );
+      }
+      break;
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_form().
+ *
+ * This is only utilized for the iframe formatter.
+ */
+function drupalcorn14_link_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $element = array();
+
+  if ($display['type'] == 'drupalcorn14_link_iframe') {
+    $element['width'] = array(
+      '#title' => t('Width'),
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#default_value' => $settings['width'],
+      '#element_validate' => array('element_validate_integer_positive'),
+      '#required' => TRUE,
+    );
+    $element['height'] = array(
+      '#title' => t('Height'),
+      '#type' => 'textfield',
+      '#size' => 20,
+      '#default_value' => $settings['height'],
+      '#element_validate' => array('element_validate_integer_positive'),
+      '#required' => TRUE,
+    );
+  }
+
+  return $element;
+}
+
+/**
+ * Implements hook_field_formatter_settings_summary().
+ *
+ * Be sure to implement this or the settings form does not get utilized.
+ */
+function drupalcorn14_link_field_formatter_settings_summary($field, $instance, $view_mode) {
+  $display = $instance['display'][$view_mode];
+  $settings = $display['settings'];
+
+  $summary = '';
+
+  if ($display['type'] == 'drupalcorn14_link_iframe') {
+    $args = array(
+      '@width' => $settings['width'],
+      '@height' => $settings['height'],
+    );
+    $summary = t('@width x @height', $args);
+  }
+
+  return $summary;
+}
